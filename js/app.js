@@ -31,12 +31,17 @@ const TERRAIN = {
   snow:      { name: '雪地', color: '#E8E8F0', moveCost: 2, defense: 0, passable: true },
 };
 
+function seededOffset(cx, cy, i, axis) {
+  const val = Math.sin(cx * 12.9898 + cy * 78.233 + i * 43.758 + axis * 93.174) * 43758.5453;
+  return val - Math.floor(val) - 0.5;
+}
+
 const TERRAIN_PATTERNS = {
   forest: (ctx, cx, cy, size) => {
     ctx.fillStyle = '#1B4D1F';
     for (let i = 0; i < 4; i++) {
-      const ox = (Math.random() - 0.5) * size * 0.6;
-      const oy = (Math.random() - 0.5) * size * 0.6;
+      const ox = seededOffset(cx, cy, i, 0) * size * 0.6;
+      const oy = seededOffset(cx, cy, i, 1) * size * 0.6;
       ctx.beginPath();
       ctx.arc(cx + ox, cy + oy, size * 0.12, 0, Math.PI * 2);
       ctx.fill();
@@ -112,8 +117,8 @@ const TERRAIN_PATTERNS = {
   snow: (ctx, cx, cy, size) => {
     ctx.fillStyle = 'rgba(200,200,220,0.5)';
     for (let i = 0; i < 3; i++) {
-      const ox = (Math.random() - 0.5) * size * 0.5;
-      const oy = (Math.random() - 0.5) * size * 0.5;
+      const ox = seededOffset(cx, cy, i, 0) * size * 0.5;
+      const oy = seededOffset(cx, cy, i, 1) * size * 0.5;
       ctx.beginPath();
       ctx.arc(cx + ox, cy + oy, 1.5, 0, Math.PI * 2);
       ctx.fill();
@@ -673,7 +678,9 @@ class WargameApp {
     this._initUI();
     this._initEvents();
     this._resize();
-    this._render();
+    this._zoomToFit();
+    this._updateUnitList();
+    this._updateStatusBar();
 
     this._setStatus('系统就绪 - 使用工具栏选择地形或部队进行放置');
   }
@@ -1853,36 +1860,61 @@ class WargameApp {
   }
 
   _exportImage() {
-    const oldZoom = this.zoom;
-    const oldPanX = this.panX;
-    const oldPanY = this.panY;
-    this.zoom = 1;
-    this.panX = 10;
-    this.panY = 10;
-
     const mapPixelW = this.mapWidth * this.hexSize * Math.sqrt(3) + this.hexSize + 20;
     const mapPixelH = this.mapHeight * this.hexSize * 1.5 + this.hexSize + 20;
 
     const exportCanvas = document.createElement('canvas');
-    exportCanvas.width = mapPixelW;
-    exportCanvas.height = mapPixelH;
+    exportCanvas.width = mapPixelW * 2;
+    exportCanvas.height = mapPixelH * 2;
     const ectx = exportCanvas.getContext('2d');
+    ectx.scale(2, 2);
 
     ectx.fillStyle = '#D4D0CC';
     ectx.fillRect(0, 0, mapPixelW, mapPixelH);
+    ectx.save();
+    ectx.translate(10, 10);
 
-    const origCtx = this.ctx;
-    const origCanvas = this.canvas;
-    this.ctx = ectx;
-    this.canvas = exportCanvas;
-    this._render();
-    this.ctx = origCtx;
-    this.canvas = origCanvas;
+    for (let r = 0; r < this.mapHeight; r++) {
+      for (let c = 0; c < this.mapWidth; c++) {
+        const pos = HexMath.hexToPixel(c, r, this.hexSize);
+        const terrain = this.map[r]?.[c] || 'plains';
+        const tData = TERRAIN[terrain];
 
-    this.zoom = oldZoom;
-    this.panX = oldPanX;
-    this.panY = oldPanY;
-    this._render();
+        ectx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const corner = HexMath.hexCorner(pos.x, pos.y, this.hexSize, i);
+          if (i === 0) ectx.moveTo(corner.x, corner.y);
+          else ectx.lineTo(corner.x, corner.y);
+        }
+        ectx.closePath();
+        ectx.fillStyle = tData.color;
+        ectx.fill();
+        ectx.strokeStyle = 'rgba(0,0,0,0.2)';
+        ectx.lineWidth = 0.5;
+        ectx.stroke();
+
+        if (TERRAIN_PATTERNS[terrain]) {
+          ectx.save();
+          ectx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const corner = HexMath.hexCorner(pos.x, pos.y, this.hexSize * 0.9, i);
+            if (i === 0) ectx.moveTo(corner.x, corner.y);
+            else ectx.lineTo(corner.x, corner.y);
+          }
+          ectx.closePath();
+          ectx.clip();
+          TERRAIN_PATTERNS[terrain](ectx, pos.x, pos.y, this.hexSize);
+          ectx.restore();
+        }
+      }
+    }
+
+    for (const unit of this.units) {
+      const pos = HexMath.hexToPixel(unit.col, unit.row, this.hexSize);
+      UnitRenderer.draw(ectx, unit, pos.x, pos.y, this.hexSize, false, true);
+    }
+
+    ectx.restore();
 
     const url = exportCanvas.toDataURL('image/png');
     const a = document.createElement('a');
