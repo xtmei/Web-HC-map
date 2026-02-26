@@ -17,18 +17,18 @@ const CONFIG = {
 
 // ─── Terrain Definitions ───
 const TERRAIN = {
-  plains:    { name: '平原', color: '#8DB76B', moveCost: 1, defense: 0, passable: true },
-  forest:    { name: '森林', color: '#2D6B30', moveCost: 2, defense: 2, passable: true },
-  mountain:  { name: '山地', color: '#8B7D6B', moveCost: 3, defense: 3, passable: true },
-  hill:      { name: '丘陵', color: '#A89B7B', moveCost: 2, defense: 1, passable: true },
-  water:     { name: '水域', color: '#4A8FC7', moveCost: 99, defense: 0, passable: false },
-  deepwater: { name: '深水', color: '#2B5F8E', moveCost: 99, defense: 0, passable: false },
-  desert:    { name: '沙漠', color: '#D4B96A', moveCost: 2, defense: 0, passable: true },
-  swamp:     { name: '沼泽', color: '#5B7744', moveCost: 3, defense: -1, passable: true },
-  urban:     { name: '城镇', color: '#9E8E8E', moveCost: 1, defense: 3, passable: true },
-  road:      { name: '道路', color: '#C4A76C', moveCost: 0.5, defense: -1, passable: true },
-  bridge:    { name: '桥梁', color: '#B0956C', moveCost: 1, defense: -1, passable: true },
-  snow:      { name: '雪地', color: '#E8E8F0', moveCost: 2, defense: 0, passable: true },
+  plains:    { name: '平原', color: '#9ABC78', dark: '#88A868', light: '#A8CC88', moveCost: 1, defense: 0, passable: true },
+  forest:    { name: '森林', color: '#4A8848', dark: '#3A7038', light: '#5A9858', moveCost: 2, defense: 2, passable: true },
+  mountain:  { name: '山地', color: '#8A7A68', dark: '#786858', light: '#9A8A78', moveCost: 3, defense: 3, passable: true },
+  hill:      { name: '丘陵', color: '#A89878', dark: '#988868', light: '#B8A888', moveCost: 2, defense: 1, passable: true },
+  water:     { name: '水域', color: '#5A9CC8', dark: '#4888B0', light: '#6AACD8', moveCost: 99, defense: 0, passable: false },
+  deepwater: { name: '深水', color: '#3A6C98', dark: '#2A5A80', light: '#4A7CA8', moveCost: 99, defense: 0, passable: false },
+  desert:    { name: '沙漠', color: '#D0B878', dark: '#C0A868', light: '#E0C888', moveCost: 2, defense: 0, passable: true },
+  swamp:     { name: '沼泽', color: '#607848', dark: '#506838', light: '#708858', moveCost: 3, defense: -1, passable: true },
+  urban:     { name: '城镇', color: '#9A9088', dark: '#8A8078', light: '#AAA098', moveCost: 1, defense: 3, passable: true },
+  road:      { name: '道路', color: '#B8A070', dark: '#A89060', light: '#C8B080', moveCost: 0.5, defense: -1, passable: true },
+  bridge:    { name: '桥梁', color: '#A89068', dark: '#988058', light: '#B8A078', moveCost: 1, defense: -1, passable: true },
+  snow:      { name: '雪地', color: '#E0E0E8', dark: '#D0D0D8', light: '#EEF0F4', moveCost: 2, defense: 0, passable: true },
 };
 
 function seededOffset(cx, cy, i, axis) {
@@ -36,116 +36,203 @@ function seededOffset(cx, cy, i, axis) {
   return val - Math.floor(val) - 0.5;
 }
 
+function seededRandom(cx, cy, i) {
+  const val = Math.sin(cx * 7.9898 + cy * 41.233 + i * 27.758) * 43758.5453;
+  return val - Math.floor(val);
+}
+
 const TERRAIN_PATTERNS = {
   forest: (ctx, cx, cy, size) => {
-    ctx.fillStyle = '#1B4D1F';
-    for (let i = 0; i < 4; i++) {
-      const ox = seededOffset(cx, cy, i, 0) * size * 0.6;
-      const oy = seededOffset(cx, cy, i, 1) * size * 0.6;
+    const treeCount = 5;
+    for (let i = 0; i < treeCount; i++) {
+      const ox = seededOffset(cx, cy, i, 0) * size * 0.55;
+      const oy = seededOffset(cx, cy, i, 1) * size * 0.5;
+      const r = size * (0.08 + seededRandom(cx, cy, i + 10) * 0.06);
+      const tx = cx + ox;
+      const ty = cy + oy;
+
+      ctx.fillStyle = '#2A5A2A';
       ctx.beginPath();
-      ctx.arc(cx + ox, cy + oy, size * 0.12, 0, Math.PI * 2);
+      ctx.moveTo(tx, ty - r * 2.2);
+      ctx.lineTo(tx - r * 1.2, ty + r * 0.6);
+      ctx.lineTo(tx + r * 1.2, ty + r * 0.6);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#358838';
+      ctx.beginPath();
+      ctx.moveTo(tx, ty - r * 1.6);
+      ctx.lineTo(tx - r, ty + r * 0.2);
+      ctx.lineTo(tx + r, ty + r * 0.2);
+      ctx.closePath();
       ctx.fill();
     }
   },
   mountain: (ctx, cx, cy, size) => {
-    ctx.fillStyle = '#6B5D4B';
+    ctx.fillStyle = '#6A5A48';
     ctx.beginPath();
-    ctx.moveTo(cx - size * 0.3, cy + size * 0.2);
-    ctx.lineTo(cx, cy - size * 0.3);
-    ctx.lineTo(cx + size * 0.3, cy + size * 0.2);
+    ctx.moveTo(cx - size * 0.35, cy + size * 0.22);
+    ctx.lineTo(cx - size * 0.05, cy - size * 0.32);
+    ctx.lineTo(cx + size * 0.15, cy - size * 0.18);
+    ctx.lineTo(cx + size * 0.35, cy + size * 0.22);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = '#FFF';
+
+    ctx.fillStyle = '#7A6A58';
     ctx.beginPath();
-    ctx.moveTo(cx - size * 0.08, cy - size * 0.15);
-    ctx.lineTo(cx, cy - size * 0.3);
-    ctx.lineTo(cx + size * 0.08, cy - size * 0.15);
+    ctx.moveTo(cx - size * 0.15, cy + size * 0.22);
+    ctx.lineTo(cx + size * 0.08, cy - size * 0.28);
+    ctx.lineTo(cx + size * 0.28, cy + size * 0.22);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#F0EDE8';
+    ctx.beginPath();
+    ctx.moveTo(cx - size * 0.05, cy - size * 0.32);
+    ctx.lineTo(cx - size * 0.1, cy - size * 0.2);
+    ctx.lineTo(cx + size * 0.02, cy - size * 0.22);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#E8E4DE';
+    ctx.beginPath();
+    ctx.moveTo(cx + size * 0.08, cy - size * 0.28);
+    ctx.lineTo(cx + size * 0.04, cy - size * 0.18);
+    ctx.lineTo(cx + size * 0.14, cy - size * 0.18);
     ctx.closePath();
     ctx.fill();
   },
   hill: (ctx, cx, cy, size) => {
-    ctx.fillStyle = '#8A7B5B';
+    ctx.fillStyle = '#90805C';
     ctx.beginPath();
-    ctx.arc(cx, cy + size * 0.1, size * 0.25, Math.PI, 0);
+    ctx.ellipse(cx - size * 0.12, cy + size * 0.08, size * 0.28, size * 0.16, 0, Math.PI, 0);
+    ctx.fill();
+
+    ctx.fillStyle = '#A0906C';
+    ctx.beginPath();
+    ctx.ellipse(cx + size * 0.1, cy + size * 0.12, size * 0.22, size * 0.12, 0, Math.PI, 0);
     ctx.fill();
   },
   urban: (ctx, cx, cy, size) => {
-    ctx.fillStyle = '#7A6E6E';
-    const s = size * 0.12;
-    ctx.fillRect(cx - s * 2, cy - s, s * 1.5, s * 2);
-    ctx.fillRect(cx, cy - s * 1.5, s * 1.5, s * 2.5);
-    ctx.fillRect(cx - s, cy + s * 0.5, s * 2, s);
+    const s = size * 0.09;
+    ctx.fillStyle = '#706468';
+    ctx.fillRect(cx - s * 3, cy - s * 1.5, s * 2, s * 3.2);
+    ctx.fillStyle = '#80747A';
+    ctx.fillRect(cx - s * 0.5, cy - s * 2.2, s * 2.2, s * 4);
+    ctx.fillStyle = '#68606A';
+    ctx.fillRect(cx + s * 2, cy - s * 0.8, s * 1.5, s * 2.5);
+
+    ctx.fillStyle = 'rgba(255,220,80,0.4)';
+    for (let i = 0; i < 4; i++) {
+      const wx = cx - s * 2.5 + seededRandom(cx, cy, i) * s * 5;
+      const wy = cy - s * 1.5 + seededRandom(cx, cy, i + 5) * s * 3;
+      ctx.fillRect(wx, wy, s * 0.5, s * 0.5);
+    }
   },
   water: (ctx, cx, cy, size) => {
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(180,220,255,0.35)';
+    ctx.lineWidth = 1.2;
     for (let i = -1; i <= 1; i++) {
       ctx.beginPath();
-      const y = cy + i * size * 0.2;
+      const y = cy + i * size * 0.18;
+      const phase = seededRandom(cx, cy, i + 3) * 4;
       ctx.moveTo(cx - size * 0.3, y);
-      ctx.quadraticCurveTo(cx - size * 0.1, y - 4, cx + size * 0.1, y);
-      ctx.quadraticCurveTo(cx + size * 0.2, y + 4, cx + size * 0.3, y);
+      ctx.quadraticCurveTo(cx - size * 0.1, y - 3 + phase, cx + size * 0.05, y);
+      ctx.quadraticCurveTo(cx + size * 0.2, y + 3 - phase, cx + size * 0.3, y - 1);
       ctx.stroke();
     }
   },
   deepwater: (ctx, cx, cy, size) => {
     TERRAIN_PATTERNS.water(ctx, cx, cy, size);
+    ctx.strokeStyle = 'rgba(100,160,220,0.2)';
+    ctx.lineWidth = 0.8;
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      const y = cy + (i - 0.5) * size * 0.3;
+      ctx.moveTo(cx - size * 0.25, y + 2);
+      ctx.quadraticCurveTo(cx, y - 2, cx + size * 0.25, y + 1);
+      ctx.stroke();
+    }
   },
   swamp: (ctx, cx, cy, size) => {
-    ctx.fillStyle = '#3A5528';
-    for (let i = 0; i < 3; i++) {
-      const ox = (i - 1) * size * 0.25;
+    ctx.fillStyle = 'rgba(60,100,50,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size * 0.1, size * 0.3, size * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#3A5828';
+    ctx.lineWidth = 1.3;
+    ctx.fillStyle = '#3A5828';
+    for (let i = 0; i < 4; i++) {
+      const ox = (i - 1.5) * size * 0.18;
       ctx.beginPath();
-      ctx.moveTo(cx + ox, cy + size * 0.15);
-      ctx.lineTo(cx + ox, cy - size * 0.15);
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = '#3A5528';
+      ctx.moveTo(cx + ox, cy + size * 0.12);
+      ctx.lineTo(cx + ox, cy - size * 0.12);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(cx + ox, cy - size * 0.15, 2, 0, Math.PI * 2);
+      ctx.arc(cx + ox - 2, cy - size * 0.13, 1.5, 0, Math.PI * 2);
+      ctx.arc(cx + ox + 2, cy - size * 0.13, 1.5, 0, Math.PI * 2);
       ctx.fill();
     }
   },
   desert: (ctx, cx, cy, size) => {
-    ctx.fillStyle = 'rgba(180,150,80,0.4)';
+    ctx.strokeStyle = 'rgba(160,130,70,0.35)';
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(cx - size * 0.3, cy + size * 0.1);
-    ctx.quadraticCurveTo(cx - size * 0.1, cy - size * 0.1, cx + size * 0.1, cy + size * 0.05);
-    ctx.quadraticCurveTo(cx + size * 0.2, cy + size * 0.15, cx + size * 0.3, cy);
+    ctx.moveTo(cx - size * 0.3, cy + size * 0.08);
+    ctx.quadraticCurveTo(cx - size * 0.1, cy - size * 0.08, cx + size * 0.1, cy + size * 0.04);
+    ctx.quadraticCurveTo(cx + size * 0.25, cy + size * 0.12, cx + size * 0.3, cy);
     ctx.stroke();
+
+    ctx.fillStyle = 'rgba(180,150,90,0.15)';
+    for (let i = 0; i < 3; i++) {
+      const ox = seededOffset(cx, cy, i, 0) * size * 0.4;
+      const oy = seededOffset(cx, cy, i, 1) * size * 0.3;
+      ctx.beginPath();
+      ctx.arc(cx + ox, cy + oy, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
   },
   snow: (ctx, cx, cy, size) => {
-    ctx.fillStyle = 'rgba(200,200,220,0.5)';
-    for (let i = 0; i < 3; i++) {
+    ctx.fillStyle = 'rgba(180,185,200,0.35)';
+    for (let i = 0; i < 4; i++) {
       const ox = seededOffset(cx, cy, i, 0) * size * 0.5;
       const oy = seededOffset(cx, cy, i, 1) * size * 0.5;
       ctx.beginPath();
-      ctx.arc(cx + ox, cy + oy, 1.5, 0, Math.PI * 2);
+      ctx.arc(cx + ox, cy + oy, 1.2, 0, Math.PI * 2);
       ctx.fill();
     }
   },
   road: (ctx, cx, cy, size) => {
-    ctx.strokeStyle = '#A08550';
-    ctx.lineWidth = size * 0.12;
-    ctx.setLineDash([4, 3]);
+    ctx.strokeStyle = '#8A7450';
+    ctx.lineWidth = size * 0.1;
     ctx.beginPath();
     ctx.moveTo(cx - size * 0.4, cy);
     ctx.lineTo(cx + size * 0.4, cy);
     ctx.stroke();
-    ctx.setLineDash([]);
-  },
-  bridge: (ctx, cx, cy, size) => {
-    ctx.strokeStyle = '#8A7550';
-    ctx.lineWidth = size * 0.15;
+
+    ctx.strokeStyle = '#C8B888';
+    ctx.lineWidth = size * 0.04;
+    ctx.setLineDash([3, 4]);
     ctx.beginPath();
     ctx.moveTo(cx - size * 0.35, cy);
     ctx.lineTo(cx + size * 0.35, cy);
     ctx.stroke();
-    ctx.strokeStyle = '#6A5530';
+    ctx.setLineDash([]);
+  },
+  bridge: (ctx, cx, cy, size) => {
+    ctx.fillStyle = '#7A6848';
+    ctx.fillRect(cx - size * 0.3, cy - size * 0.04, size * 0.6, size * 0.08);
+
+    ctx.strokeStyle = '#6A5838';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(cx, cy, size * 0.2, Math.PI, 0);
+    ctx.arc(cx, cy + size * 0.02, size * 0.2, Math.PI, 0);
     ctx.stroke();
+
+    ctx.fillStyle = '#6A5838';
+    ctx.fillRect(cx - size * 0.3, cy - size * 0.07, size * 0.04, size * 0.14);
+    ctx.fillRect(cx + size * 0.26, cy - size * 0.07, size * 0.04, size * 0.14);
   },
 };
 
@@ -372,7 +459,6 @@ class MapGenerator {
             map[r][c] = 'plains';
           }
         } else if (type === 'pacific') {
-          const cx = width / 2, cy = height / 2;
           const islandNoise = noise.octaveNoise(c / 4, r / 4, 3, 0.6);
           if (islandNoise > 0.3) {
             map[r][c] = elev > 0.3 ? 'mountain' : moist > 0.1 ? 'forest' : 'plains';
@@ -503,102 +589,203 @@ class Unit {
   }
 }
 
-// ─── Unit Renderer ───
+// ─── Unit Renderer (Premium Silver 3D) ───
 class UnitRenderer {
   static draw(ctx, unit, cx, cy, size, selected, showStrength) {
-    const w = size * 1.1;
-    const h = size * 0.75;
-    const baseColor = unit.side === 'blue' ? '#1565C0' : '#C62828';
-    const bgColor = unit.side === 'blue' ? 'rgba(21,101,192,0.15)' : 'rgba(198,40,40,0.15)';
-    const borderColor = unit.side === 'blue' ? '#0D47A1' : '#B71C1C';
+    const w = size * 1.05;
+    const h = size * 0.72;
+    const x = cx - w / 2;
+    const y = cy - h / 2;
+
+    const isBlue = unit.side === 'blue';
+    const sideColor = isBlue ? '#1565C0' : '#C62828';
+    const sideDark = isBlue ? '#0D47A1' : '#8E1B1B';
+    const sideLight = isBlue ? '#4A90D9' : '#E04545';
 
     ctx.save();
 
     if (selected) {
-      ctx.shadowColor = baseColor;
-      ctx.shadowBlur = 8;
+      ctx.shadowColor = sideColor;
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    } else {
+      ctx.shadowColor = 'rgba(0,0,0,0.4)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 2;
     }
 
-    ctx.fillStyle = bgColor;
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = 1.5;
-    ctx.fillRect(cx - w / 2, cy - h / 2, w, h);
-    ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+    const silverGrad = ctx.createLinearGradient(x, y, x, y + h);
+    silverGrad.addColorStop(0, '#F0F0F2');
+    silverGrad.addColorStop(0.15, '#E8E8EC');
+    silverGrad.addColorStop(0.5, '#D0D0D6');
+    silverGrad.addColorStop(0.85, '#B8B8C0');
+    silverGrad.addColorStop(1, '#A0A0AA');
+
+    UnitRenderer._roundRect(ctx, x, y, w, h, 2);
+    ctx.fillStyle = silverGrad;
+    ctx.fill();
 
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
-    ctx.strokeStyle = baseColor;
+    const borderGrad = ctx.createLinearGradient(x, y, x, y + h);
+    borderGrad.addColorStop(0, '#C8C8D0');
+    borderGrad.addColorStop(0.5, '#888890');
+    borderGrad.addColorStop(1, '#606068');
+
+    UnitRenderer._roundRect(ctx, x, y, w, h, 2);
+    ctx.strokeStyle = borderGrad;
     ctx.lineWidth = 1.5;
-    UnitRenderer._drawSymbol(ctx, unit.type, cx, cy, w, h, baseColor);
+    ctx.stroke();
+
+    const topHighlight = ctx.createLinearGradient(x, y, x, y + h * 0.35);
+    topHighlight.addColorStop(0, 'rgba(255,255,255,0.45)');
+    topHighlight.addColorStop(1, 'rgba(255,255,255,0)');
+    UnitRenderer._roundRect(ctx, x + 1, y + 1, w - 2, h * 0.35, 1);
+    ctx.fillStyle = topHighlight;
+    ctx.fill();
+
+    const sideStripe = ctx.createLinearGradient(x, y, x, y + h);
+    sideStripe.addColorStop(0, sideLight);
+    sideStripe.addColorStop(0.5, sideColor);
+    sideStripe.addColorStop(1, sideDark);
+    ctx.fillStyle = sideStripe;
+    ctx.fillRect(x + 1, y + 1, 3, h - 2);
+    ctx.fillRect(x + w - 4, y + 1, 3, h - 2);
+
+    const topBar = ctx.createLinearGradient(x, y, x, y + 3);
+    topBar.addColorStop(0, sideColor);
+    topBar.addColorStop(1, sideDark);
+    ctx.fillStyle = topBar;
+    ctx.fillRect(x + 1, y + 1, w - 2, 3);
+
+    ctx.strokeStyle = sideDark;
+    ctx.lineWidth = 1.8;
+    ctx.globalAlpha = 0.85;
+    UnitRenderer._drawSymbol(ctx, unit.type, cx, cy + 1, w * 0.78, h * 0.58, sideColor, sideDark);
+    ctx.globalAlpha = 1.0;
 
     if (showStrength) {
-      const barW = w * 0.8;
-      const barH = 3;
-      const barY = cy + h / 2 + 3;
-      ctx.fillStyle = '#333';
-      ctx.fillRect(cx - barW / 2, barY, barW, barH);
+      const barW = w * 0.82;
+      const barH = 3.5;
+      const barY = y + h + 4;
+      const barX = cx - barW / 2;
+
+      ctx.fillStyle = 'rgba(40,40,50,0.6)';
+      UnitRenderer._roundRect(ctx, barX, barY, barW, barH, 1.5);
+      ctx.fill();
+
       const pct = unit.strength / unit.maxStrength;
-      ctx.fillStyle = pct > 0.5 ? '#4CAF50' : pct > 0.25 ? '#FF9800' : '#F44336';
-      ctx.fillRect(cx - barW / 2, barY, barW * pct, barH);
+      const barColor = pct > 0.5 ? '#5CB860' : pct > 0.25 ? '#E8A030' : '#D84040';
+      const barGrad = ctx.createLinearGradient(barX, barY, barX, barY + barH);
+      barGrad.addColorStop(0, barColor);
+      barGrad.addColorStop(1, UnitRenderer._darken(barColor, 0.3));
+      ctx.fillStyle = barGrad;
+      UnitRenderer._roundRect(ctx, barX, barY, barW * pct, barH, 1.5);
+      ctx.fill();
     }
 
     const sizeIndicator = UnitRenderer._getSizeIndicator(unit);
     if (sizeIndicator) {
-      ctx.fillStyle = baseColor;
-      ctx.font = `bold ${Math.max(7, size * 0.22)}px sans-serif`;
+      ctx.fillStyle = sideDark;
+      ctx.font = `bold ${Math.max(7, size * 0.2)}px "Segoe UI", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(sizeIndicator, cx, cy - h / 2 - 1);
+      ctx.fillText(sizeIndicator, cx, y - 1);
+    }
+
+    if (selected) {
+      UnitRenderer._roundRect(ctx, x - 1, y - 1, w + 2, h + 2, 3);
+      ctx.strokeStyle = sideLight;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
     }
 
     ctx.restore();
   }
 
-  static _drawSymbol(ctx, type, cx, cy, w, h, color) {
+  static _roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+
+  static _darken(hex, amount) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgb(${Math.round(r * (1 - amount))},${Math.round(g * (1 - amount))},${Math.round(b * (1 - amount))})`;
+  }
+
+  static _drawSymbol(ctx, type, cx, cy, w, h, color, dark) {
     const hw = w / 2, hh = h / 2;
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
+    ctx.strokeStyle = dark;
+    ctx.fillStyle = dark;
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
 
     switch (type) {
       case 'infantry':
         ctx.beginPath();
         ctx.moveTo(cx - hw, cy - hh);
         ctx.lineTo(cx + hw, cy + hh);
+        ctx.stroke();
+        ctx.beginPath();
         ctx.moveTo(cx + hw, cy - hh);
         ctx.lineTo(cx - hw, cy + hh);
         ctx.stroke();
         break;
       case 'armor':
         ctx.beginPath();
-        ctx.ellipse(cx, cy, hw * 0.7, hh * 0.6, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy, hw * 0.72, hh * 0.65, 0, 0, Math.PI * 2);
         ctx.stroke();
         break;
       case 'artillery':
         ctx.beginPath();
-        ctx.arc(cx, cy, Math.min(hw, hh) * 0.4, 0, Math.PI * 2);
+        ctx.arc(cx, cy, Math.min(hw, hh) * 0.42, 0, Math.PI * 2);
         ctx.fill();
         break;
       case 'mechanized':
+        ctx.lineWidth = 1.4;
         ctx.beginPath();
         ctx.moveTo(cx - hw, cy - hh);
         ctx.lineTo(cx + hw, cy + hh);
+        ctx.stroke();
+        ctx.beginPath();
         ctx.moveTo(cx + hw, cy - hh);
         ctx.lineTo(cx - hw, cy + hh);
         ctx.stroke();
         ctx.beginPath();
-        ctx.ellipse(cx, cy, hw * 0.5, hh * 0.45, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy, hw * 0.5, hh * 0.48, 0, 0, Math.PI * 2);
         ctx.stroke();
         break;
       case 'airborne':
+        ctx.lineWidth = 1.4;
         ctx.beginPath();
         ctx.moveTo(cx - hw, cy - hh);
         ctx.lineTo(cx + hw, cy + hh);
+        ctx.stroke();
+        ctx.beginPath();
         ctx.moveTo(cx + hw, cy - hh);
         ctx.lineTo(cx - hw, cy + hh);
         ctx.stroke();
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
         ctx.moveTo(cx - hw * 0.5, cy - hh);
-        ctx.lineTo(cx, cy - hh - hh * 0.5);
+        ctx.lineTo(cx, cy - hh - hh * 0.55);
         ctx.lineTo(cx + hw * 0.5, cy - hh);
         ctx.stroke();
         break;
@@ -609,17 +796,19 @@ class UnitRenderer {
         ctx.stroke();
         break;
       case 'hq':
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
         ctx.moveTo(cx - hw, cy - hh);
         ctx.lineTo(cx, cy + hh);
         ctx.lineTo(cx + hw, cy - hh);
         ctx.stroke();
-        ctx.font = `bold ${Math.max(8, hh * 0.6)}px sans-serif`;
+        ctx.font = `bold ${Math.max(7, hh * 0.55)}px "Segoe UI", sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('HQ', cx, cy - hh * 0.2);
+        ctx.fillText('HQ', cx, cy - hh * 0.25);
         break;
     }
+    ctx.lineCap = 'butt';
   }
 
   static _getSizeIndicator(unit) {
@@ -674,6 +863,8 @@ class WargameApp {
       lastCenter: null,
     };
 
+    this._hexGradientCache = new Map();
+
     this._initMap();
     this._initUI();
     this._initEvents();
@@ -699,6 +890,7 @@ class WargameApp {
     this.selectedUnit = null;
     this.selectedHex = null;
     this.movementRange = [];
+    this._hexGradientCache.clear();
     this._updateStatusBar();
     this._render();
   }
@@ -723,6 +915,7 @@ class WargameApp {
     this.units = state.units;
     this.mapHeight = this.map.length;
     this.mapWidth = this.map[0].length;
+    this._hexGradientCache.clear();
     this._render();
     this._setStatus('撤销操作');
   }
@@ -738,6 +931,7 @@ class WargameApp {
     this.units = state.units;
     this.mapHeight = this.map.length;
     this.mapWidth = this.map[0].length;
+    this._hexGradientCache.clear();
     this._render();
     this._setStatus('重做操作');
   }
@@ -814,6 +1008,7 @@ class WargameApp {
 
     document.getElementById('hex-size').addEventListener('input', (e) => {
       this.hexSize = parseInt(e.target.value);
+      this._hexGradientCache.clear();
       this._render();
     });
 
@@ -1056,7 +1251,6 @@ class WargameApp {
     clearTimeout(this._touchTimer);
     if (e.touches.length === 0) {
       if (!this._touchAction && this._touchStartPos) {
-        const rect = this.canvas.getBoundingClientRect();
         const x = this._touchStartPos.x;
         const y = this._touchStartPos.y;
         this._onPointerDown(x, y, { button: 0, shiftKey: false });
@@ -1117,10 +1311,8 @@ class WargameApp {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const containerRect = document.getElementById('canvas-container').getBoundingClientRect();
-    const mapPixelW = this.mapWidth * this.hexSize * Math.sqrt(3) * this.zoom;
-    const mapPixelH = this.mapHeight * this.hexSize * 1.5 * this.zoom;
-    const scaleX = this.minimapCanvas.width / (this.mapWidth * this.hexSize * Math.sqrt(3));
-    const scaleY = this.minimapCanvas.height / (this.mapHeight * this.hexSize * 1.5);
+    const scaleX = this.minimapCanvas.width / (window.devicePixelRatio || 1) / (this.mapWidth * this.hexSize * Math.sqrt(3));
+    const scaleY = this.minimapCanvas.height / (window.devicePixelRatio || 1) / (this.mapHeight * this.hexSize * 1.5);
     const scale = Math.min(scaleX, scaleY);
 
     this.panX = -(x / scale * this.zoom - containerRect.width / 2);
@@ -1361,6 +1553,7 @@ class WargameApp {
     this.minimapCanvas.height = mr.height * dpr;
     this.minimapCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    this._hexGradientCache.clear();
     this._render();
   }
 
@@ -1396,18 +1589,18 @@ class WargameApp {
     if (this.movementRange.length > 0) {
       for (const h of this.movementRange) {
         if (h.col >= startCol && h.col <= endCol && h.row >= startRow && h.row <= endRow) {
-          this._drawHexHighlight(ctx, h.col, h.row, 'rgba(100,200,100,0.3)', 'rgba(100,200,100,0.7)');
+          this._drawHexHighlight(ctx, h.col, h.row, 'rgba(80,200,90,0.22)', 'rgba(80,200,90,0.6)');
         }
       }
     }
 
     if (this.selectedHex) {
-      this._drawHexHighlight(ctx, this.selectedHex.col, this.selectedHex.row, 'rgba(255,255,100,0.3)', 'rgba(255,255,0,0.8)');
+      this._drawHexHighlight(ctx, this.selectedHex.col, this.selectedHex.row, 'rgba(255,230,80,0.2)', 'rgba(255,210,40,0.75)');
     }
 
     if (this.hoverHex && this.hoverHex.col >= 0 && this.hoverHex.col < this.mapWidth &&
         this.hoverHex.row >= 0 && this.hoverHex.row < this.mapHeight) {
-      this._drawHexHighlight(ctx, this.hoverHex.col, this.hoverHex.row, 'rgba(255,255,255,0.15)', 'rgba(255,255,255,0.5)');
+      this._drawHexHighlight(ctx, this.hoverHex.col, this.hoverHex.row, 'rgba(255,255,255,0.1)', 'rgba(255,255,255,0.35)');
     }
 
     for (const unit of this.units) {
@@ -1436,14 +1629,21 @@ class WargameApp {
     }
     ctx.closePath();
 
-    ctx.fillStyle = tData.color;
+    const grad = ctx.createRadialGradient(
+      pos.x - this.hexSize * 0.15, pos.y - this.hexSize * 0.2, 0,
+      pos.x, pos.y, this.hexSize * 0.95
+    );
+    grad.addColorStop(0, tData.light || tData.color);
+    grad.addColorStop(0.7, tData.color);
+    grad.addColorStop(1, tData.dark || tData.color);
+    ctx.fillStyle = grad;
     ctx.fill();
 
     if (TERRAIN_PATTERNS[terrain]) {
       ctx.save();
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
-        const corner = HexMath.hexCorner(pos.x, pos.y, this.hexSize * 0.9, i);
+        const corner = HexMath.hexCorner(pos.x, pos.y, this.hexSize * 0.88, i);
         if (i === 0) ctx.moveTo(corner.x, corner.y);
         else ctx.lineTo(corner.x, corner.y);
       }
@@ -1461,22 +1661,35 @@ class WargameApp {
         else ctx.lineTo(corner.x, corner.y);
       }
       ctx.closePath();
-      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      ctx.beginPath();
+      const inset = this.hexSize * 0.97;
+      for (let i = 0; i < 6; i++) {
+        const corner = HexMath.hexCorner(pos.x, pos.y, inset, i);
+        if (i === 0) ctx.moveTo(corner.x, corner.y);
+        else ctx.lineTo(corner.x, corner.y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
       ctx.lineWidth = 0.5;
       ctx.stroke();
     }
 
     if (this.showCoords) {
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.font = `${Math.max(7, this.hexSize * 0.22)}px sans-serif`;
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.font = `${Math.max(7, this.hexSize * 0.2)}px "Segoe UI", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`${col},${row}`, pos.x, pos.y + this.hexSize * 0.35);
     }
 
     if (this.showTerrainLabels) {
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.font = `${Math.max(7, this.hexSize * 0.2)}px sans-serif`;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.font = `${Math.max(7, this.hexSize * 0.18)}px "Segoe UI", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(tData.name, pos.x, pos.y - this.hexSize * 0.35);
@@ -1505,11 +1718,14 @@ class WargameApp {
     const mh = this.minimapCanvas.height / (window.devicePixelRatio || 1);
     mctx.clearRect(0, 0, mw, mh);
 
+    mctx.fillStyle = '#1A2030';
+    mctx.fillRect(0, 0, mw, mh);
+
     const mapPixelW = this.mapWidth * this.hexSize * Math.sqrt(3);
     const mapPixelH = this.mapHeight * this.hexSize * 1.5;
     const scaleX = mw / mapPixelW;
     const scaleY = mh / mapPixelH;
-    const scale = Math.min(scaleX, scaleY) * 0.95;
+    const scale = Math.min(scaleX, scaleY) * 0.92;
     const offsetX = (mw - mapPixelW * scale) / 2;
     const offsetY = (mh - mapPixelH * scale) / 2;
 
@@ -1522,17 +1738,20 @@ class WargameApp {
         const pos = HexMath.hexToPixel(c, r, this.hexSize);
         const terrain = this.map[r]?.[c] || 'plains';
         mctx.fillStyle = TERRAIN[terrain].color;
-        const s = this.hexSize * 0.5;
+        const s = this.hexSize * 0.48;
         mctx.fillRect(pos.x - s, pos.y - s, s * 2, s * 2);
       }
     }
 
     for (const unit of this.units) {
       const pos = HexMath.hexToPixel(unit.col, unit.row, this.hexSize);
-      mctx.fillStyle = unit.side === 'blue' ? '#1565C0' : '#C62828';
+      mctx.fillStyle = unit.side === 'blue' ? '#4A90D9' : '#D84040';
       mctx.beginPath();
-      mctx.arc(pos.x, pos.y, this.hexSize * 0.6, 0, Math.PI * 2);
+      mctx.arc(pos.x, pos.y, this.hexSize * 0.55, 0, Math.PI * 2);
       mctx.fill();
+      mctx.strokeStyle = unit.side === 'blue' ? '#1565C0' : '#C62828';
+      mctx.lineWidth = this.hexSize * 0.12;
+      mctx.stroke();
     }
 
     mctx.restore();
@@ -1601,14 +1820,25 @@ class WargameApp {
     const typeName = UNIT_TYPES[unit.type].name;
     const terrain = this.map[unit.row]?.[unit.col] || 'plains';
     const tData = TERRAIN[terrain];
+    const sideColor = unit.side === 'blue' ? '#1565C0' : '#C62828';
 
     content.innerHTML = `
       <div class="unit-symbol-preview">
         <svg viewBox="0 0 60 40" width="60" height="40">
-          <rect x="2" y="4" width="56" height="32" fill="none" stroke="${unit.side === 'blue' ? '#1565C0' : '#C62828'}" stroke-width="2"/>
+          <defs>
+            <linearGradient id="silverBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E8E8EC"/>
+              <stop offset="50%" stop-color="#D0D0D6"/>
+              <stop offset="100%" stop-color="#A8A8B0"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="4" width="56" height="32" rx="2" fill="url(#silverBg)" stroke="${sideColor}" stroke-width="2"/>
+          <rect x="2" y="4" width="56" height="4" fill="${sideColor}" rx="1"/>
+          <rect x="2" y="4" width="4" height="32" fill="${sideColor}" rx="1"/>
+          <rect x="54" y="4" width="4" height="32" fill="${sideColor}" rx="1"/>
         </svg>
       </div>
-      <div class="info-row"><span class="label">阵营</span><span class="value" style="color:${unit.side === 'blue' ? '#1565C0' : '#C62828'}">${sideLabel}</span></div>
+      <div class="info-row"><span class="label">阵营</span><span class="value" style="color:${sideColor}">${sideLabel}</span></div>
       <div class="info-row"><span class="label">类型</span><span class="value">${typeName}</span></div>
       <div class="info-row"><span class="label">位置</span><span class="value">(${unit.col}, ${unit.row})</span></div>
       <div class="info-row"><span class="label">地形</span><span class="value">${tData.name}</span></div>
@@ -1616,7 +1846,7 @@ class WargameApp {
       <div class="info-row"><span class="label">防御力</span><span class="value">${unit.defense} (+${tData.defense})</span></div>
       <div class="info-row"><span class="label">移动力</span><span class="value">${unit.movement}/${unit.maxMovement}</span></div>
       <div class="info-row"><span class="label">兵力</span><span class="value">${unit.strength}%</span></div>
-      <div class="info-bar"><div class="info-bar-fill" style="width:${unit.strength}%;background:${unit.strength > 50 ? '#4CAF50' : unit.strength > 25 ? '#FF9800' : '#F44336'}"></div></div>
+      <div class="info-bar"><div class="info-bar-fill" style="width:${unit.strength}%;background:${unit.strength > 50 ? '#5CB860' : unit.strength > 25 ? '#E8A030' : '#D84040'}"></div></div>
     `;
     panel.classList.remove('hidden');
   }
@@ -1634,7 +1864,7 @@ class WargameApp {
       <div class="info-row"><span class="label">移动消耗</span><span class="value">${tData.moveCost}</span></div>
       <div class="info-row"><span class="label">防御修正</span><span class="value">${tData.defense >= 0 ? '+' : ''}${tData.defense}</span></div>
       <div class="info-row"><span class="label">可通行</span><span class="value">${tData.passable ? '是' : '否'}</span></div>
-      <div style="margin-top:8px;text-align:center;padding:8px;border-radius:4px;background:${tData.color};color:${terrain === 'snow' || terrain === 'desert' ? '#333' : '#fff'}">${tData.name}</div>
+      <div style="margin-top:10px;text-align:center;padding:10px;border-radius:6px;background:linear-gradient(180deg,${tData.light || tData.color},${tData.dark || tData.color});color:${terrain === 'snow' || terrain === 'desert' ? '#333' : '#fff'};font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.3)">${tData.name}</div>
     `;
     panel.classList.remove('hidden');
   }
@@ -1660,14 +1890,14 @@ class WargameApp {
   _updateUnitList() {
     const list = document.getElementById('unit-list');
     if (this.units.length === 0) {
-      list.innerHTML = '<div style="color:#888;font-size:11px;padding:4px">暂无部队</div>';
+      list.innerHTML = '<div style="color:#8A8E98;font-size:11px;padding:6px;text-align:center">暂无部队</div>';
       return;
     }
     list.innerHTML = this.units.map(u => `
       <div class="unit-list-item" data-unit-id="${u.id}">
         <div class="unit-list-dot" style="background:${u.side === 'blue' ? '#1565C0' : '#C62828'}"></div>
         <span>${u.name}</span>
-        <span style="margin-left:auto;opacity:0.6">(${u.col},${u.row})</span>
+        <span style="margin-left:auto;opacity:0.5;font-size:10px">(${u.col},${u.row})</span>
       </div>
     `).join('');
 
@@ -1846,6 +2076,7 @@ class WargameApp {
           this.selectedUnit = null;
           this.selectedHex = null;
           this.movementRange = [];
+          this._hexGradientCache.clear();
           this._updateUnitList();
           this._updateStatusBar();
           this._zoomToFit();
@@ -1869,7 +2100,7 @@ class WargameApp {
     const ectx = exportCanvas.getContext('2d');
     ectx.scale(2, 2);
 
-    ectx.fillStyle = '#D4D0CC';
+    ectx.fillStyle = '#A8A49C';
     ectx.fillRect(0, 0, mapPixelW, mapPixelH);
     ectx.save();
     ectx.translate(10, 10);
@@ -1887,17 +2118,26 @@ class WargameApp {
           else ectx.lineTo(corner.x, corner.y);
         }
         ectx.closePath();
-        ectx.fillStyle = tData.color;
+
+        const grad = ectx.createRadialGradient(
+          pos.x - this.hexSize * 0.15, pos.y - this.hexSize * 0.2, 0,
+          pos.x, pos.y, this.hexSize * 0.95
+        );
+        grad.addColorStop(0, tData.light || tData.color);
+        grad.addColorStop(0.7, tData.color);
+        grad.addColorStop(1, tData.dark || tData.color);
+        ectx.fillStyle = grad;
         ectx.fill();
-        ectx.strokeStyle = 'rgba(0,0,0,0.2)';
-        ectx.lineWidth = 0.5;
+
+        ectx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ectx.lineWidth = 0.8;
         ectx.stroke();
 
         if (TERRAIN_PATTERNS[terrain]) {
           ectx.save();
           ectx.beginPath();
           for (let i = 0; i < 6; i++) {
-            const corner = HexMath.hexCorner(pos.x, pos.y, this.hexSize * 0.9, i);
+            const corner = HexMath.hexCorner(pos.x, pos.y, this.hexSize * 0.88, i);
             if (i === 0) ectx.moveTo(corner.x, corner.y);
             else ectx.lineTo(corner.x, corner.y);
           }
@@ -2030,36 +2270,38 @@ class WargameApp {
   _showShortcutsDialog() {
     this._openDialog('快捷键列表', `
       <table style="width:100%;font-size:12px;border-collapse:collapse">
-        <tr><td style="padding:3px 8px"><b>V</b></td><td>选择工具</td></tr>
-        <tr><td style="padding:3px 8px"><b>Space</b></td><td>平移工具</td></tr>
-        <tr><td style="padding:3px 8px"><b>B</b></td><td>绘制地形</td></tr>
-        <tr><td style="padding:3px 8px"><b>E</b></td><td>擦除地形</td></tr>
-        <tr><td style="padding:3px 8px"><b>G</b></td><td>显示/隐藏网格</td></tr>
-        <tr><td style="padding:3px 8px"><b>C</b></td><td>显示/隐藏坐标</td></tr>
-        <tr><td style="padding:3px 8px"><b>+/-</b></td><td>放大/缩小</td></tr>
-        <tr><td style="padding:3px 8px"><b>Home</b></td><td>适应画面</td></tr>
-        <tr><td style="padding:3px 8px"><b>方向键</b></td><td>平移地图</td></tr>
-        <tr><td style="padding:3px 8px"><b>Delete</b></td><td>删除选中部队</td></tr>
-        <tr><td style="padding:3px 8px"><b>Esc</b></td><td>取消选择</td></tr>
-        <tr><td style="padding:3px 8px"><b>Ctrl+Z/Y</b></td><td>撤销/重做</td></tr>
-        <tr><td style="padding:3px 8px"><b>Ctrl+S</b></td><td>保存场景</td></tr>
-        <tr><td style="padding:3px 8px"><b>Ctrl+O</b></td><td>加载场景</td></tr>
-        <tr><td style="padding:3px 8px"><b>Ctrl+E</b></td><td>导出图片</td></tr>
-        <tr><td style="padding:3px 8px"><b>双击部队</b></td><td>编辑部队属性</td></tr>
-        <tr><td style="padding:3px 8px"><b>右键部队</b></td><td>编辑部队属性</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">V</td><td>选择工具</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">Space</td><td>平移工具</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">B</td><td>绘制地形</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">E</td><td>擦除地形</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">G</td><td>显示/隐藏网格</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">C</td><td>显示/隐藏坐标</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">+/-</td><td>放大/缩小</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">Home</td><td>适应画面</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">方向键</td><td>平移地图</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">Delete</td><td>删除选中部队</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">Esc</td><td>取消选择</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">Ctrl+Z/Y</td><td>撤销/重做</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">Ctrl+S</td><td>保存场景</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">Ctrl+O</td><td>加载场景</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">Ctrl+E</td><td>导出图片</td></tr>
+        <tr style="background:rgba(0,0,0,0.03)"><td style="padding:4px 10px;font-weight:700">双击部队</td><td>编辑部队属性</td></tr>
+        <tr><td style="padding:4px 10px;font-weight:700">右键部队</td><td>编辑部队属性</td></tr>
       </table>
     `, () => {});
   }
 
   _showAboutDialog() {
     this._openDialog('关于系统', `
-      <div style="text-align:center;padding:12px">
-        <div style="font-size:24px;margin-bottom:8px">⚔</div>
-        <h2 style="margin:0 0 4px">Wargame Visualizer</h2>
-        <p style="margin:0 0 8px;color:#666">兵棋推演可视化系统 v1.0</p>
-        <p style="font-size:11px;color:#888;margin:0">
-          一个专业的兵棋历史可视化工具<br>
+      <div style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:10px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))">⚔</div>
+        <h2 style="margin:0 0 6px;color:#2A3448;letter-spacing:1px">Wargame Visualizer</h2>
+        <p style="margin:0 0 12px;color:#6A6E78;font-size:13px">兵棋推演可视化系统 v2.0</p>
+        <div style="width:60px;height:2px;background:linear-gradient(90deg,transparent,#8098B0,transparent);margin:0 auto 12px"></div>
+        <p style="font-size:11px;color:#8A8E98;margin:0;line-height:1.8">
+          专业级兵棋推演可视化工具<br>
           支持地图生成、部队部署与推演模拟<br>
+          银质立体兵棋 · 精细地图渲染<br>
           适配桌面端、平板与手机
         </p>
       </div>
